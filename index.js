@@ -1,20 +1,27 @@
-const express = require('express')
+import { Client } from 'pg'
+import express from 'express'
+const client = new Client({
+    host: 'localhost',
+    port: 5432,
+    user: 'postgres',
+    password: 'postgres',
+    database: 'postgres'
+})
+
 const app = express()
 const port = 3000
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.get('/', (req, res) => {
-  res.send('Hello World!')
+    res.send('Hello World')
 })
-
-app.post('/user', (req, res) => {
-    console.log(req.body)
-    if(req.body.email.length === 0) {
-        console.log('Email is required')
-        return res.status(204).send('Email is required')
-    }
-    res.send('Ok message recu par l\'api')
+app.get('/users', async (req, res) => {
+    await client.connect()
+    const result = await client.query('SELECT * FROM "user"')
+    await client.end()
+    console.log(result.rows)
+    res.send(result.rows)
 })
 
 app.listen(port, () => {
