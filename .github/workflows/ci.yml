@@ -7,6 +7,7 @@ on:
 
 env:
   REGISTRY: "ghcr.io"
+  IMAGE_NAME: "api"
 
 jobs:
 
@@ -16,11 +17,12 @@ jobs:
 
     permissions:
       packages: write
+      contents: read
 
     steps:
       - uses: actions/checkout@v3
 
-      ## Authenticate to registry repo github
+      ## Authenticate to registry repo github for private repo
       ##
       - name: Log in to the Container registry
         uses: docker/login-action@v2
@@ -38,7 +40,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY }}/${{ github.repository }}
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
           tags: type=sha
 
       - name: Build and push Docker image
@@ -48,5 +50,5 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ github.repository }}:buildcache
-          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ github.repository }}:buildcache,mode=max
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:buildcache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
